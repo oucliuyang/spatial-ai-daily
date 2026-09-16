@@ -1,0 +1,771 @@
+<title>端到端导航日报 · 第 0007 期</title>
+
+<style>
+  :root{
+    --cream:#F4EEE3;
+    --cream-2:#EAE1D0;
+    --cream-3:#FAF6EC;
+    --dark:#221A17;
+    --dark-line:#3C302A;
+    --wine:#7E1D24;
+    --red:#A32B2B;
+    --red-2:#B4544B;
+    --ink:#1B1815;
+    --ink-2:#4C443D;
+    --ink-3:#8C8175;
+    --rule:#D9D0BE;
+    --on-dark:#F2EDE4;
+    --on-dark-2:#A99C8D;
+
+    --sans:"PingFang SC","Hiragino Sans GB","Source Han Sans SC","Noto Sans CJK SC","Microsoft YaHei",-apple-system,"Segoe UI",Roboto,sans-serif;
+    --mono:"Cascadia Mono",ui-monospace,"SF Mono","JetBrains Mono",Consolas,"DejaVu Sans Mono",monospace;
+    --serif:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;
+  }
+
+  body{ background:var(--cream); color:var(--ink); font-family:var(--sans); font-size:15px; line-height:1.75; -webkit-font-smoothing:antialiased; }
+  a{ color:inherit; }
+  a:focus-visible, summary:focus-visible{ outline:2px solid var(--red); outline-offset:3px; }
+
+  .eyebrow{ font-family:var(--mono); font-size:.68rem; letter-spacing:.22em; text-transform:uppercase; color:var(--red); }
+  .mono{ font-family:var(--mono); font-variant-numeric:tabular-nums; }
+
+  /* ── 顶栏 ── */
+  .topbar{
+    position:sticky; top:0; z-index:20; background:var(--cream);
+    border-bottom:1px solid var(--red);
+    display:flex; align-items:center; gap:1.5rem;
+    padding:.75rem 2rem; flex-wrap:wrap;
+  }
+  .topbar .logo{ font-size:.95rem; font-weight:800; letter-spacing:.02em; }
+  .topbar nav{ display:flex; gap:3.2rem; margin:0 auto; }
+  .topbar nav a{ font-size:.82rem; text-decoration:none; color:var(--ink-2); }
+  .topbar nav a:hover{ color:var(--red); }
+  .topbar nav a.on{ color:var(--ink); font-weight:700; }
+  .stamp{ font-family:var(--mono); font-size:.66rem; letter-spacing:.14em; color:var(--ink-3); line-height:1.7; white-space:nowrap; }
+  .stamp b{ color:var(--ink-2); font-weight:400; }
+
+  /* ── 通栏骨架 ── */
+  .band{ border-bottom:1px solid var(--rule); }
+  .band[data-bg="dark"]{ background:var(--dark); color:var(--on-dark); border-bottom-color:var(--dark-line); }
+  .band[data-bg="cream2"]{ background:var(--cream-2); }
+  .band[data-bg="cream3"]{ background:var(--cream-3); }
+
+  .split{
+    max-width:1560px; margin:0 auto;
+    display:grid; grid-template-columns:1fr; gap:0;
+  }
+  @media (min-width:900px){
+    .split{ grid-template-columns:16rem 1fr; }
+    .rail{ border-right:1px solid var(--rule); }
+    .band[data-bg="dark"] .rail{ border-right-color:var(--dark-line); }
+  }
+  .rail{ padding:2.6rem 1.6rem 2rem 2rem; }
+  .rail .num{
+    font-family:var(--mono); font-size:3.4rem; line-height:1; font-weight:300;
+    color:var(--red); letter-spacing:.02em; font-variant-numeric:tabular-nums slashed-zero;
+    font-feature-settings:"zero" 1;
+  }
+  .rail .cn{ margin-top:1.1rem; font-size:.8rem; color:var(--ink-2); }
+  .rail .en{ font-family:var(--mono); font-size:.62rem; letter-spacing:.18em; color:var(--ink-3); text-transform:uppercase; }
+  .band[data-bg="dark"] .rail .cn{ color:var(--on-dark-2); }
+  .band[data-bg="dark"] .rail .en{ color:#6E6058; }
+
+  .col{ padding:2.6rem 2rem 3.4rem; min-width:0; }
+
+  h2.big{
+    font-size:clamp(1.5rem,1rem + 2.1vw,2.35rem); font-weight:800; line-height:1.34;
+    margin:.55rem 0 0; letter-spacing:-.01em; text-wrap:balance;
+  }
+  .sec-note{ font-family:var(--mono); font-size:.66rem; line-height:1.9; color:var(--ink-3); text-align:right; letter-spacing:.04em; }
+
+  /* ── 首屏 ── */
+  .hero{ max-width:1560px; margin:0 auto; display:grid; grid-template-columns:1fr; }
+  @media (min-width:900px){ .hero{ grid-template-columns:1fr 1fr; } .hero .right{ border-left:1px solid var(--rule); } }
+  .hero .left{ padding:3.4rem 2rem 3rem; display:flex; flex-direction:column; }
+  .hero .right{ padding:3.4rem 2rem 3rem; }
+
+  .hero h1{
+    font-size:clamp(2.6rem,1.4rem + 5.2vw,5.1rem); font-weight:900; line-height:1.02;
+    letter-spacing:.01em; margin:.7rem 0 0;
+  }
+  .hero .sub{ margin-top:1rem; font-size:clamp(1rem,.85rem + .6vw,1.32rem); letter-spacing:.22em; color:var(--ink-2); font-weight:400; }
+
+  .pull{ margin-top:4.5rem; border-left:2px solid var(--wine); padding-left:1.3rem; }
+  .pull .tag{ font-size:.75rem; color:var(--red); letter-spacing:.1em; }
+  .pull p{ margin:.9rem 0 0; font-size:clamp(1.35rem,1rem + 1.6vw,2.05rem); font-weight:800; line-height:1.46; letter-spacing:.01em; }
+
+  .cta{ margin-top:auto; padding-top:3rem; display:flex; gap:.8rem; flex-wrap:wrap; }
+  .btn{
+    display:inline-flex; align-items:center; gap:2.4rem; justify-content:space-between;
+    font-size:.8rem; font-weight:700; text-decoration:none; padding:.75rem 1.1rem; min-width:10rem;
+  }
+  .btn[data-k="solid"]{ background:var(--wine); color:#F7F1E7; }
+  .btn[data-k="solid"]:hover{ background:#6A1720; }
+  .btn[data-k="ghost"]{ border:1px solid var(--wine); color:var(--wine); }
+  .btn[data-k="ghost"]:hover{ background:rgba(126,29,36,.06); }
+
+  /* 时间轴 */
+  .vlog-h{ display:flex; align-items:baseline; gap:1rem; border-bottom:1px solid var(--rule); padding-bottom:.5rem; }
+  .vlog-h .cnt{ margin-left:auto; font-family:var(--mono); font-size:.68rem; color:var(--red); letter-spacing:.1em; }
+  .vlog{ margin-top:2rem; border-left:1px solid var(--rule); padding-left:2rem; display:flex; flex-direction:column; }
+  .ev{ position:relative; padding:0 0 1.9rem; border-bottom:1px dashed var(--rule); margin-bottom:1.9rem; display:flex; gap:1rem; align-items:flex-start; }
+  .ev:last-child{ border-bottom:0; margin-bottom:0; padding-bottom:0; }
+  .ev::before{
+    content:""; position:absolute; left:-2.44rem; top:.42rem;
+    width:.55rem; height:.55rem; border-radius:50%;
+    background:var(--red); box-shadow:0 0 0 3px var(--cream), 0 0 0 4px var(--red);
+  }
+  .ev .meat{ flex:1; min-width:0; }
+  .ev .ts{ font-family:var(--mono); font-size:.68rem; color:var(--ink-3); letter-spacing:.1em; }
+  .ev h3{ font-size:1.12rem; font-weight:600; margin:.35rem 0 .6rem; letter-spacing:.01em; }
+  .ev h3 a{ text-decoration:none; border-bottom:1px solid var(--ink-3); }
+  .ev h3 a:hover{ color:var(--red); border-color:var(--red); }
+  .ev .kv{ font-size:.72rem; color:var(--ink-2); line-height:1.85; }
+  .ev .kv b{ font-weight:400; color:var(--ink-3); }
+  .ev .ok{ color:var(--red); font-size:1.4rem; line-height:1; padding-top:.4rem; }
+  .sig-line{ margin-top:2rem; text-align:right; font-family:var(--serif); font-style:italic; font-size:.95rem; color:var(--red-2); }
+
+  /* ── 结论条目 ── */
+  .items{ margin-top:2.4rem; }
+  .item{ border-top:1px dashed var(--rule); padding:1.7rem 0; display:grid; grid-template-columns:2.6rem 1fr; gap:1rem; }
+  .item:first-child{ border-top:1px solid var(--rule); }
+  .item .n{ font-family:var(--mono); font-size:.95rem; color:var(--red); padding-top:.1rem; }
+  .item .hd{ display:flex; gap:.7rem; align-items:center; flex-wrap:wrap; margin-bottom:.55rem; }
+  .item h3{ font-size:1.08rem; font-weight:700; margin:0; letter-spacing:.01em; }
+  .item p{ margin:0; font-size:.87rem; color:var(--ink-2); max-width:64ch; }
+  .item strong{ color:var(--ink); font-weight:700; }
+  .pill{ font-family:var(--mono); font-size:.62rem; letter-spacing:.08em; color:var(--red); border:1px solid var(--red); padding:.02rem .3rem; white-space:nowrap; }
+  .src{ display:inline-block; margin-top:.9rem; font-family:var(--mono); font-size:.68rem; letter-spacing:.06em; color:var(--red); text-decoration:none; font-weight:700; }
+  .src:hover{ text-decoration:underline; }
+  .src + .src{ margin-left:1.4rem; }
+  details{ margin-top:.6rem; }
+  summary{ cursor:pointer; list-style:none; font-family:var(--mono); font-size:.68rem; letter-spacing:.06em; color:var(--red); font-weight:700; }
+  summary::-webkit-details-marker{ display:none; }
+  summary::after{ content:" ＋"; }
+  details[open] summary::after{ content:" －"; }
+  .drawer{ margin-top:.9rem; padding:1rem 1.2rem; background:rgba(0,0,0,.028); border-left:1px solid var(--rule); font-size:.85rem; color:var(--ink-2); display:flex; flex-direction:column; gap:.7rem; }
+  .drawer p{ margin:0; max-width:66ch; }
+  .drawer b{ color:var(--ink); }
+
+  /* ── 深色卡片 ── */
+  .cards{ margin-top:2.2rem; display:grid; grid-template-columns:1fr; border:1px solid var(--dark-line); }
+  @media (min-width:1000px){ .cards{ grid-template-columns:repeat(3,1fr); } .card + .card{ border-left:1px solid var(--dark-line); border-top:0; } }
+  .card + .card{ border-top:1px solid var(--dark-line); }
+  .card{ padding:1.7rem 1.5rem; display:flex; flex-direction:column; gap:.9rem; }
+  .card .eyebrow{ color:var(--red-2); font-size:.62rem; }
+  .card h3{ font-size:1.28rem; font-weight:700; margin:0; line-height:1.42; color:var(--on-dark); letter-spacing:.01em; }
+  .card p{ margin:0; font-size:.84rem; color:var(--on-dark-2); }
+  .card ul{ margin:0; padding-left:1.1rem; list-style:none; display:flex; flex-direction:column; gap:.3rem; }
+  .card li{ font-size:.79rem; color:var(--on-dark-2); font-family:var(--mono); letter-spacing:.01em; }
+  .card li a{ color:var(--red-2); text-decoration:none; margin-left:.5rem; }
+  .card li a:hover{ text-decoration:underline; }
+  .card .links{ margin-top:auto; padding-top:.6rem; display:flex; gap:1.1rem; flex-wrap:wrap; }
+  .card .links a{ font-family:var(--mono); font-size:.7rem; color:var(--red-2); text-decoration:none; letter-spacing:.05em; }
+  .card .links a:hover{ text-decoration:underline; }
+
+  .note{ margin-top:1.6rem; border:1px solid var(--dark-line); border-left:2px solid var(--red); padding:1.2rem 1.4rem; display:grid; grid-template-columns:1fr; gap:1rem; }
+  @media (min-width:900px){ .note{ grid-template-columns:11rem 1fr; gap:2rem; } }
+  .note .lab{ font-family:var(--mono); font-size:.64rem; letter-spacing:.12em; color:var(--red-2); text-transform:uppercase; }
+  .note p{ margin:0; font-size:.85rem; color:var(--on-dark-2); }
+  .note b{ color:var(--on-dark); font-weight:600; }
+
+  /* ── 榜单 ── */
+  .lb{ margin-top:2rem; display:grid; grid-template-columns:1fr; gap:2rem; }
+  @media (min-width:1000px){ .lb{ grid-template-columns:1.35fr 1fr; align-items:start; } }
+  .lb p{ margin:0 0 .8rem; font-size:.88rem; color:var(--ink-2); max-width:56ch; }
+  .caveat{ background:var(--cream-2); border-left:2px solid var(--wine); padding:.75rem 1rem; font-size:.8rem; color:var(--ink-2); }
+  .lb-links{ margin-top:1rem; display:flex; gap:1.4rem; flex-wrap:wrap; }
+  .lb-links a{ font-family:var(--mono); font-size:.7rem; color:var(--red); text-decoration:none; font-weight:700; letter-spacing:.04em; }
+  .lb-links a:hover{ text-decoration:underline; }
+
+  .statcard{ border:1px solid var(--red); padding:1.5rem 1.6rem 1.2rem; }
+  .statcard .eyebrow{ font-size:.62rem; }
+  .statcard .huge{ font-size:clamp(3.2rem,2rem + 4vw,4.9rem); font-weight:300; color:var(--red); line-height:1; margin:.7rem 0 .3rem; font-family:var(--mono); letter-spacing:-.02em; }
+  .statcard .cap{ font-family:var(--mono); font-size:.64rem; letter-spacing:.12em; color:var(--ink-3); text-transform:uppercase; }
+  .statcard .rows{ margin-top:1.4rem; border-top:1px solid var(--rule); }
+  .statcard .r{ display:flex; justify-content:space-between; gap:1rem; border-bottom:1px dotted var(--rule); padding:.45rem 0; font-size:.76rem; }
+  .statcard .r:last-child{ border-bottom:0; }
+  .statcard .r span:first-child{ font-family:var(--mono); color:var(--ink-2); letter-spacing:.03em; }
+  .statcard .r span:last-child{ font-family:var(--mono); color:var(--ink); font-variant-numeric:tabular-nums; }
+
+  /* ── 表格 ── */
+  .scroll{ overflow-x:auto; margin-top:2rem; }
+  table{ border-collapse:collapse; width:100%; min-width:46rem; }
+  thead th{ font-family:var(--mono); font-size:.62rem; letter-spacing:.14em; text-transform:uppercase; color:var(--ink-3); font-weight:400; text-align:left; padding:0 1rem .5rem 0; border-bottom:1px solid var(--red); white-space:nowrap; }
+  tbody td{ padding:1.05rem 1rem 1.05rem 0; border-bottom:1px solid var(--rule); vertical-align:top; font-size:.83rem; color:var(--ink-2); }
+  tbody tr:last-child td{ border-bottom:0; }
+  td.k{ font-family:var(--mono); font-size:.75rem; color:var(--ink-3); width:2.5rem; }
+  td.name{ font-weight:700; color:var(--ink); font-size:.88rem; white-space:nowrap; }
+
+  /* ── 审阅清单 ── */
+  .queue{ margin-top:2rem; }
+  .q{ display:grid; grid-template-columns:2.8rem 1fr; gap:1rem; padding:1.4rem 1.1rem; border-bottom:1px solid var(--rule); }
+  .q:first-child{ background:var(--cream-2); border-top:1px solid var(--rule); }
+  .q .n{ font-family:var(--mono); font-size:.92rem; color:var(--red); }
+  .q .grid{ display:grid; grid-template-columns:1fr; gap:.9rem; }
+  @media (min-width:1000px){ .q .grid{ grid-template-columns:1.15fr 1fr 5.5rem; gap:1.6rem; align-items:start; } }
+  .q h3{ font-size:.98rem; font-weight:700; margin:0 0 .3rem; line-height:1.45; }
+  .q h3 a{ text-decoration:none; }
+  .q h3 a:hover{ color:var(--red); }
+  .q .by{ font-size:.72rem; color:var(--ink-3); }
+  .q .why{ font-size:.78rem; color:var(--ink-2); }
+  .q .why em{ font-style:normal; color:var(--red); }
+  .q .act{ justify-self:start; font-family:var(--mono); font-size:.64rem; color:var(--red); border:1px solid var(--red); padding:.15rem .45rem; white-space:nowrap; }
+
+  /* ── 变更日志 ── */
+  .delta{ margin-top:2rem; display:grid; grid-template-columns:1fr; border:1px solid var(--rule); }
+  @media (min-width:900px){ .delta{ grid-template-columns:1fr 1fr; } }
+  .dcell{ padding:1.4rem 1.5rem; border-top:1px solid var(--rule); display:flex; flex-direction:column; gap:.5rem; }
+  .dcell:nth-child(-n+1){ border-top:0; }
+  @media (min-width:900px){
+    .dcell:nth-child(-n+2){ border-top:0; }
+    .dcell:nth-child(even){ border-left:1px solid var(--rule); }
+  }
+  .dcell h4{ font-size:1rem; font-weight:700; margin:0; }
+  .dcell p{ margin:0; font-size:.82rem; color:var(--ink-2); }
+
+  /* ── 归档 ── */
+  .arch{ margin-top:1.6rem; }
+  .arow{ display:grid; grid-template-columns:1fr; gap:.35rem; padding:1.1rem 0; border-bottom:1px solid var(--rule); }
+  @media (min-width:800px){ .arow{ grid-template-columns:9rem 1fr 6rem; gap:1.5rem; align-items:baseline; } }
+  .arow:first-child{ border-top:1px solid var(--rule); }
+  .arow .when{ font-family:var(--mono); font-size:.7rem; color:var(--ink-3); letter-spacing:.06em; line-height:1.7; }
+  .arow h4{ font-size:.95rem; font-weight:700; margin:0 0 .18rem; }
+  .arow .meta2{ font-size:.72rem; color:var(--ink-3); }
+  .arow .cur{ font-family:var(--mono); font-size:.64rem; color:var(--red); justify-self:start; }
+  @media (min-width:800px){ .arow .cur{ justify-self:end; } }
+
+  /* ── 页脚 ── */
+  footer{ background:var(--wine); color:#F3E9DC; }
+  .fin{ max-width:1560px; margin:0 auto; padding:1.6rem 2rem; display:flex; align-items:center; gap:1.5rem; flex-wrap:wrap; }
+  .fin .fl{ font-size:.92rem; font-weight:800; }
+  .fin .fc{ margin:0 auto; font-family:var(--mono); font-size:.66rem; letter-spacing:.2em; color:#D9BFB6; text-transform:uppercase; }
+  .fin .fr{ font-size:.72rem; color:#E7D4CB; text-decoration:none; }
+  .fin .fr:hover{ text-decoration:underline; }
+  .credit{ max-width:1560px; margin:0 auto; padding:0 2rem 1.6rem; font-size:.68rem; color:#C9A79E; line-height:1.9; }
+</style>
+
+<div class="topbar">
+  <span class="logo">端到端导航日报</span>
+  <nav>
+    <a href="../index.html">总览</a>
+    <a class="on" href="#hero">今日</a>
+    <a href="#s2">主题</a>
+    <a href="#s5">排行榜</a>
+    <a href="#arch">归档</a>
+  </nav>
+  <div class="stamp">DATE&nbsp;&nbsp;: <b>2026.09.16</b><br>ISSUE&nbsp;: <b>0007</b></div>
+</div>
+
+<!-- ══════ 首屏 ══════ -->
+<div class="band" id="hero">
+  <div class="hero">
+    <div class="left">
+      <div class="eyebrow">End-to-End Navigation Research Notes</div>
+      <h1>导航日报</h1>
+      <div class="sub">端到端导航 · 导航大模型 · 世界模型</div>
+
+      <div class="pull">
+        <div class="tag">＊&nbsp;&nbsp;今日结论</div>
+        <p>让模型比较，<br>别让它直接给数。</p>
+      </div>
+
+      <div class="cta">
+        <a class="btn" data-k="solid" href="#s1">阅读今日简报<span>→</span></a>
+        <a class="btn" data-k="ghost" href="#arch">浏览全部日报<span>→</span></a>
+      </div>
+    </div>
+
+    <div class="right">
+      <div class="vlog-h">
+        <span class="eyebrow">Verification Log</span>
+        <span class="cnt">新增 05</span>
+      </div>
+
+      <div class="vlog">
+        <div class="ev">
+          <div class="meat">
+            <div class="ts">01&nbsp;&nbsp;[ 09·14 ]&nbsp;&nbsp;›</div>
+            <h3><a href="https://arxiv.org/abs/2609.15142">C²Nav</a></h3>
+            <div class="kv"><b>领域:</b> 零样本 / VLN-CE<br><b>结果:</b> 同一接口 SR 31.0% 与 44.0%</div>
+          </div>
+          <div class="ok">✓</div>
+        </div>
+
+        <div class="ev">
+          <div class="meat">
+            <div class="ts">02&nbsp;&nbsp;[ 09·10 ]&nbsp;&nbsp;›</div>
+            <h3><a href="https://arxiv.org/abs/2609.11445">FARM</a></h3>
+            <div class="kv"><b>领域:</b> 世界模型 / 失败监测<br><b>结果:</b> 3.4 万参数读出头 AUROC 85.68</div>
+          </div>
+          <div class="ok">✓</div>
+        </div>
+
+        <div class="ev">
+          <div class="meat">
+            <div class="ts">03&nbsp;&nbsp;[ 09·12 ]&nbsp;&nbsp;›</div>
+            <h3><a href="https://arxiv.org/abs/2609.14146">SmolVLA 部署分析</a></h3>
+            <div class="kv"><b>领域:</b> 部署 / 延迟耦合<br><b>结果:</b> p99 减半，Spatial 70.0%→41.0%</div>
+          </div>
+          <div class="ok">✓</div>
+        </div>
+      </div>
+
+      <div class="sig-line">Ask the model to compare, not to commit.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════ 01 今日结论 ══════ -->
+<div class="band" id="s1">
+  <div class="split">
+    <div class="rail">
+      <div class="num">01</div>
+      <div class="cn">今日结论</div>
+      <div class="en">2026.09.16</div>
+    </div>
+    <div class="col">
+      <div style="display:flex;gap:2rem;align-items:flex-start;flex-wrap:wrap">
+        <div style="flex:1;min-width:16rem">
+          <div class="eyebrow">Daily Brief / Issue 0007</div>
+          <h2 class="big">五项信号：比较式接口与失败预警</h2>
+        </div>
+        <div class="sec-note">覆盖窗口：2026.09.06 – 09.14<br>官方口径与作者自报已分别标注</div>
+      </div>
+
+      <div class="items">
+
+        <div class="item">
+          <div class="n">01</div>
+          <div>
+            <div class="hd"><span class="pill">高</span><h3>把 VLM 从下判断改成做比较</h3></div>
+            <p>C²Nav 换掉零样本 VLN-CE 的模型-机器人接口：不再向 VLM 要航点、像素、朝向、进度值这类<strong>基数输出</strong>或不可逆的到达决定，而是让它在控制器构造好的候选之间<strong>比较</strong>，几何、阈值、动作幅度与执行全留在物理侧。</p>
+            <details>
+              <summary>展开全文</summary>
+              <div class="drawer">
+                <p>免训练三件套：Seeing 在物理上已核验的候选视角间做序数式 Gaze Election；Remembering 维护紧凑路线草图并比较相邻指令段假设；Arriving 用犹豫阶梯、回看比较与可撤销的走回来保证停得住。</p>
+                <p>OpenNav R2R-CE 100 协议上配 Qwen3-VL-8B-Instruct 得 <b>OSR 41.0% / SR 31.0% / SPL 16.7%</b>，同一接口换 GPT-5.5 得 <b>54.0% / 44.0% / 29.0%</b>。只把比较式答案形式换回基数或绝对式提问，空间、转移、终止三处的 SR 分别掉到 12.0%、28.0%、21.0%——受限决策接口与更强 VLM 推理是互补而非可互换。</p>
+              </div>
+            </details>
+            <a class="src" href="https://arxiv.org/abs/2609.15142">核验来源 ↗</a>
+          </div>
+        </div>
+
+        <div class="item">
+          <div class="n">02</div>
+          <div>
+            <div class="hd"><span class="pill">高</span><h3>免训练导航收进一套工具协议</h3></div>
+            <p>HarnessVLN 用 Agent Harness 把感知、检索、接地、导航、恢复与终止统一到一个工具接口下：Harness 拿<strong>空间证据、几何可行性与子目标一致性</strong>校验规划器提案，并把结构化工具反馈回灌进后续决策。</p>
+            <details>
+              <summary>展开全文</summary>
+              <div class="drawer">
+                <p>分层事件记忆跟踪任务进度与执行历史，持久化时空图保留可复用的空间证据与失败标注以供核验和恢复；导航执行器可替换，同一套 Harness 协议因此同时支持指令跟随与物体目标导航。</p>
+                <p>作者自报 R2R、RxR、HM3D-v2、HM3D-OVON 上成功率 <b>60.8% / 53.9% / 76.0% / 59.3%</b>，称超过此前免训练 SOTA，并在人形机器人上做了真实环境部署。均为自报口径，无官方榜单可核。</p>
+              </div>
+            </details>
+            <a class="src" href="https://arxiv.org/abs/2609.15195">核验来源 ↗</a>
+            <a class="src" href="https://harnessvln.netlify.app/">项目页 ↗</a>
+          </div>
+        </div>
+
+        <div class="item">
+          <div class="n">03</div>
+          <div>
+            <div class="hd"><span class="pill">中高</span><h3>复合扰动推不出来</h3></div>
+            <p>LIBERO-CTRL 把每个初始状态在单轴条件与匹配的同时扰动条件间配对，暴露出汇总成功率分辨不了的两种反向变化：<strong>涌现失败</strong>（各单轴都成、同时扰动却败）与<strong>补偿成功</strong>（有单轴失败、同时扰动反而成）。</p>
+            <details>
+              <summary>展开全文</summary>
+              <div class="drawer">
+                <p>两者方向相反会互相抵消，于是复合成功率看起来与单轴测量一致，个体结果却已大不相同。即便两类转移率之差在统计上与零无法区分，仍有多达 <b>29.0%</b> 的匹配初始状态改变了结果；六个策略、三档强度下最受影响的条件达 <b>34.5%</b>。</p>
+                <p>结论直接可用：复合鲁棒性无法只靠单轴汇总成功率刻画，必须做逐实例配对评测。这与 0006 期快慢 agent 的配对实验是同一种方法论。</p>
+              </div>
+            </details>
+            <a class="src" href="https://arxiv.org/abs/2609.15940">核验来源 ↗</a>
+          </div>
+        </div>
+
+        <div class="item">
+          <div class="n">04</div>
+          <div>
+            <div class="hd"><span class="pill">中高</span><h3>失败信号已经在世界模型里</h3></div>
+            <p>FARM 的问题很干脆：冻结的预训练机器人世界模型，其内部预测状态里是不是已经直接可解码出失败信息？答案是可以——只在冻结的 VLA-JEPA 预测状态上训一个 <strong>33,985 参数</strong>的监督读出头，就能给出逐步失败分与因果轨迹风险。</p>
+            <details>
+              <summary>展开全文</summary>
+              <div class="drawer">
+                <p>七个源任务的五折 out-of-fold 评测达到 <b>85.68 / 88.59</b> 的汇总 AUROC/AUPRC，在 10 任务基准上于 15 个匹配基线中取得最佳 Seen 表现；冻结状态就绪后仅增加 <b>0.2256 ms</b> 平均 CUDA 延迟。</p>
+                <p>在 PIPER X、SO-101 与 Franka 上的四个真机群体里，用固定读出头迁移与只调读出头两种方式测试部署偏移，全程不更新预测主干。含义是运行时监控未必需要额外训练专用组件。</p>
+              </div>
+            </details>
+            <a class="src" href="https://arxiv.org/abs/2609.11445">核验来源 ↗</a>
+          </div>
+        </div>
+
+        <div class="item">
+          <div class="n">05</div>
+          <div>
+            <div class="hd"><span class="pill">中高</span><h3>推得快了，闭环行为就变了</h3></div>
+            <p>同一个 SmolVLA 只换部署后端，闭环行为就变了：PyTorch+AMP 在 LIBERO Spatial 上成功率 <strong>70.0%</strong>、p99 延迟 1181 ms；两个 ONNX 变体把 p99 压到 <strong>601 与 532 ms</strong>，Spatial 却掉到 <strong>41.0% 与 40.0%</strong>。</p>
+            <details>
+              <summary>展开全文</summary>
+              <div class="drawer">
+                <p>Object 一路维持在 88.0%~89.0%，掉的只有 Spatial。图审计发现那两个所谓 FP16/INT8 产物其实是<b>逐字节相同的 FP32 图</b>，被标为 INT8 的那一行并非算子级量化——『量化即提速』的说法要先做产物核验再谈收益。</p>
+                <p>静态语言宽度消融（16/24/32 token）给出 Spatial 成功率 41.0%、75.0%、71.0%：宽度 24 的 ONNX 以约一半延迟拿到与 PyTorch+AMP 基线相当的成功率（Wilson 区间重叠，两比例卡方 p=0.53）。作者主张部署评测应同时报告延迟、产物审计、接口约束与闭环成功率。</p>
+              </div>
+            </details>
+            <a class="src" href="https://arxiv.org/abs/2609.14146">核验来源 ↗</a>
+            <a class="src" href="https://github.com/rafiqul713/smolvla-libero-onnx">代码 ↗</a>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════ 02-04 主题记录 ══════ -->
+<div class="band" data-bg="dark" id="s2">
+  <div class="split">
+    <div class="rail">
+      <div class="num">02–04</div>
+      <div class="cn">主题记录</div>
+      <div class="en">Interface / Verify / Deploy</div>
+    </div>
+    <div class="col">
+      <div class="cards">
+
+        <div class="card">
+          <div class="eyebrow">零样本导航 · 接口设计</div>
+          <h3>把决策难度移回控制器</h3>
+          <p>C²Nav 让 VLM 只做比较，同一接口换模型 SR 从 31.0% 到 44.0%；HarnessVLN 用工具协议校验提案，四个基准均称超免训练 SOTA；O2C-Nav 每决策步只调一次大模型。</p>
+          <ul>
+            <li>2609.15142: 比较式接口 · 免训练</li>
+            <li>2609.15195: R2R 60.8% · HM3D-v2 76.0% <a href="https://harnessvln.netlify.app/">项目页 ↗</a></li>
+            <li>2609.06476: 单次调用 · 航点投影成标记 <a href="https://github.com/kkpsq/O2C-Nav-Code">代码 ↗</a></li>
+          </ul>
+          <div class="links">
+            <a href="https://arxiv.org/abs/2609.15142">C²Nav ↗</a>
+            <a href="https://arxiv.org/abs/2609.15195">HarnessVLN ↗</a>
+            <a href="https://arxiv.org/abs/2609.06476">O2C-Nav ↗</a>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="eyebrow">可核验 · 监测与验证器</div>
+          <h3>成功率之外要有中间诊断</h3>
+          <p>FARM 从冻结世界模型读出失败分，额外延迟 0.2256 ms；No Free Checker 梳理约 150 个验证器，发现可得性越高可信度越低；分阶段诊断显示感知退化在管线各段并非同比例传递。</p>
+          <ul>
+            <li>2609.11445: 3.4 万参数读出头</li>
+            <li>2609.09250: 约 150 个验证器 · 九项指标</li>
+            <li>2609.07126: 10 种退化 · 50 个任务</li>
+          </ul>
+          <div class="links">
+            <a href="https://arxiv.org/abs/2609.11445">FARM ↗</a>
+            <a href="https://arxiv.org/abs/2609.09250">No Free Checker ↗</a>
+            <a href="https://arxiv.org/abs/2609.07126">分阶段可靠性 ↗</a>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="eyebrow">部署 · 延迟与对齐</div>
+          <h3>省下的毫秒要记在哪一栏</h3>
+          <p>SmolVLA 的 ONNX 变体 p99 减半但 Spatial 成功率掉近 30 个点；EffVLA 发现动作头性能主要由初始化而非解码器架构决定；LIBERO-CTRL 说明复合扰动要逐实例配对看。</p>
+          <ul>
+            <li>2609.14146: p99 1181→532 ms · SR 掉 <a href="https://github.com/rafiqul713/smolvla-libero-onnx">代码 ↗</a></li>
+            <li>2609.13984: 初始化是最大杠杆</li>
+            <li>2609.15940: 29.0% 实例结果翻转</li>
+          </ul>
+          <div class="links">
+            <a href="https://arxiv.org/abs/2609.14146">SmolVLA 部署分析 ↗</a>
+            <a href="https://arxiv.org/abs/2609.13984">EffVLA ↗</a>
+            <a href="https://arxiv.org/abs/2609.15940">LIBERO-CTRL ↗</a>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="note">
+        <div class="lab">研发判断 / Note 07-A</div>
+        <p>三条可直接用：<b>接口比模型更省钱</b>——C²Nav 的角色反转实验显示，把基数输出换成比较式提问能差出十几个点 SR，且与换更强 VLM 互补；<b>监控可以白嫖主干</b>——FARM 证明冻结世界模型的预测状态本身就是可用监控特征，3.4 万参数、0.2256 ms 开销，值得在自研策略上复现；<b>提速要连闭环一起报</b>——SmolVLA 的图审计提醒先确认导出产物真的量化过，再谈延迟收益，否则省下的毫秒是拿成功率换的。</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════ 05 排行榜 ══════ -->
+<div class="band" id="s5">
+  <div class="split">
+    <div class="rail">
+      <div class="num">05</div>
+      <div class="cn">排行榜</div>
+      <div class="en">Verified Only</div>
+    </div>
+    <div class="col">
+      <div class="eyebrow">Leaderboard Watch</div>
+      <h2 class="big">本期无官方口径评测更新</h2>
+      <div class="lb"><div><div class="caveat">口径提示：本期未出现可独立复核的公开挑战赛或官方榜单更新；论文内部实验数字不与官方提交榜排名混列。</div></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════ 06 方向雷达 ══════ -->
+<div class="band" data-bg="cream2" id="s6">
+  <div class="split">
+    <div class="rail">
+      <div class="num">06</div>
+      <div class="cn">方向雷达</div>
+      <div class="en">Watchlist</div>
+    </div>
+    <div class="col">
+      <div class="eyebrow">Direction Radar</div>
+      <h2 class="big">本期雷达：接口、核验与部署五条线</h2>
+
+      <div class="scroll">
+        <table>
+          <thead>
+            <tr><th></th><th>方向</th><th>证据</th><th>为什么值得关注</th><th>主要风险</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="k">01</td>
+              <td class="name">比较式接口</td>
+              <td><span class="pill">高</span></td>
+              <td>角色反转消融给出因果证据</td>
+              <td>SR 绝对值仍低，100 集协议样本小</td>
+            </tr>
+            <tr>
+              <td class="k">02</td>
+              <td class="name">工具协议导航</td>
+              <td><span class="pill">中高</span></td>
+              <td>四基准免训练 SOTA · 人形真机</td>
+              <td>全部自报口径，无官方榜单可核</td>
+            </tr>
+            <tr>
+              <td class="k">03</td>
+              <td class="name">配对复合评测</td>
+              <td><span class="pill">高</span></td>
+              <td>29.0% 实例翻转被汇总掩盖</td>
+              <td>限于 LIBERO 仿真，六策略样本</td>
+            </tr>
+            <tr>
+              <td class="k">04</td>
+              <td class="name">冻结态失败读出</td>
+              <td><span class="pill">中高</span></td>
+              <td>AUROC 85.68 · 增开销 0.2256 ms</td>
+              <td>依赖 VLA-JEPA 类预训练主干</td>
+            </tr>
+            <tr>
+              <td class="k">05</td>
+              <td class="name">延迟-行为耦合</td>
+              <td><span class="pill">中高</span></td>
+              <td>p99 减半伴随 Spatial 掉 29 个点</td>
+              <td>单模型单卡，产物本身未真量化</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════ 07 审阅清单 ══════ -->
+<div class="band" data-bg="cream3" id="s7">
+  <div class="split">
+    <div class="rail">
+      <div class="num">07</div>
+      <div class="cn">审阅清单</div>
+      <div class="en">Reading Queue</div>
+    </div>
+    <div class="col">
+      <div class="queue">
+
+        <div class="q">
+          <div class="n">01</div>
+          <div class="grid">
+            <div>
+              <h3><a href="https://arxiv.org/abs/2609.15142">C$^2$Nav: Compare Before You Commit for Zero-Shot Vision-and-Language Navigation</a></h3>
+              <div class="by">Runtian Zheng et al. · 2026.09.14</div>
+            </div>
+            <div class="why">VLM 只做序数比较；同接口 SR 31.0%/44.0%，换回基数提问掉到 12.0%~28.0%。<br><em>与我们：</em>零样本导航里大模型该被问什么的接口设计范本。</div>
+            <div class="act">精读 ＋</div>
+          </div>
+        </div>
+
+        <div class="q">
+          <div class="n">02</div>
+          <div class="grid">
+            <div>
+              <h3><a href="https://arxiv.org/abs/2609.11445">FARM: Reading Failure Signals from the Internal Predictive States of a Frozen Robotic World Model</a></h3>
+              <div class="by">Haoran Pei et al. · 2026.09.10</div>
+            </div>
+            <div class="why">冻结 VLA-JEPA 预测态上训 33,985 参数读出头，AUROC/AUPRC 85.68/88.59。<br><em>与我们：</em>运行时失败监控的低开销实现路径。</div>
+            <div class="act">精读 ＋</div>
+          </div>
+        </div>
+
+        <div class="q">
+          <div class="n">03</div>
+          <div class="grid">
+            <div>
+              <h3><a href="https://arxiv.org/abs/2609.15940">Beyond Single-Axis Testing: Paired Evaluation of Compound Robustness in Vision-Language-Action Policies</a></h3>
+              <div class="by">Hiroki Sawada, Shunichi Kasahara · 2026.09.14</div>
+            </div>
+            <div class="why">涌现失败与补偿成功相互抵消，29.0% 匹配初始状态结果翻转而汇总看不出。<br><em>与我们：</em>内部鲁棒性验收必须改逐实例配对的依据。</div>
+            <div class="act">浏览后精读 ＋</div>
+          </div>
+        </div>
+
+        <div class="q">
+          <div class="n">04</div>
+          <div class="grid">
+            <div>
+              <h3><a href="https://arxiv.org/abs/2609.14146">When Faster VLA Deployment Changes Closed-Loop Behavior: Task Success-Latency Analysis of SmolVLA Across PyTorch and ONNX Variants</a></h3>
+              <div class="by">Rafiqul Islam · 2026.09.12</div>
+            </div>
+            <div class="why">p99 1181→532 ms 但 Spatial 成功率 70.0%→40.0%；所谓量化产物实为 FP32 图。<br><em>与我们：</em>策略模型上板前的部署评测清单。</div>
+            <div class="act">浏览后精读 ＋</div>
+          </div>
+        </div>
+
+        <div class="q">
+          <div class="n">05</div>
+          <div class="grid">
+            <div>
+              <h3><a href="https://arxiv.org/abs/2609.09250">No Free Checker: A Survey of Verifiers for Robot Policies</a></h3>
+              <div class="by">Yang Wan et al. · 2026.09.08</div>
+            </div>
+            <div class="why">梳理约 150 个验证器，四类判定源上可得性升高则可信度下降，给出九项可核指标。<br><em>与我们：</em>选自动验收信号时的取舍地图。</div>
+            <div class="act">浏览 ＋</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════ 08 变更日志 ══════ -->
+<div class="band" id="s8">
+  <div class="split">
+    <div class="rail">
+      <div class="num">08</div>
+      <div class="cn">与上一期对比</div>
+      <div class="en">Delta Only</div>
+    </div>
+    <div class="col">
+      <div class="eyebrow">Change Log</div>
+      <h2 class="big">与 0006 相比</h2>
+
+      <div class="delta">
+        <div class="dcell">
+          <span class="pill">调整</span>
+          <h4>零样本转向接口设计</h4>
+          <p>0006 的胜负手是证据合并与快慢分层；本期 C²Nav 把 VLM 答案形式本身当设计变量，消融给出因果证据。</p>
+        </div>
+        <div class="dcell">
+          <span class="pill">新增</span>
+          <h4>失败预警白嫖主干</h4>
+          <p>FARM 用 3.4 万参数读出头从冻结预测状态解码失败分，监控不再需要单独训练组件。</p>
+        </div>
+        <div class="dcell">
+          <span class="pill">新增</span>
+          <h4>部署延迟进日报</h4>
+          <p>SmolVLA 分析显示 p99 减半伴随 Spatial 成功率掉近 30 个点，延迟与闭环行为须合并报告。</p>
+        </div>
+        <div class="dcell">
+          <span class="pill">调整</span>
+          <h4>配对评测继续加码</h4>
+          <p>0006 用配对实验量化深思价值；本期 LIBERO-CTRL 用逐实例配对揭示 29.0% 结果翻转被汇总抵消。</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════ 归档 ══════ -->
+<div class="band" id="arch">
+  <div class="split">
+    <div class="rail"></div>
+    <div class="col">
+      <div class="eyebrow">Archive / 研究档案</div>
+      <h2 class="big" style="font-size:clamp(1.6rem,1.1rem + 2vw,2.5rem)">往期日报</h2>
+      <p style="margin:.9rem 0 0;font-size:.85rem;color:var(--ink-2);max-width:60ch">每一期完整保留八个栏目、评测口径、审阅清单、中文摘要与原始链接。点击期次展开全文。</p>
+
+      <div class="arch">
+        <div class="arow">
+          <div class="when">2026.09.16<br>ISSUE 0007</div>
+          <div>
+            <h4>比较式接口与失败预警</h4>
+            <div class="meta2">9 篇 backlog 精选 · 0 项官方口径 · 完整八栏</div>
+          </div>
+          <div class="cur">当前期</div>
+        </div>
+
+        <div class="arow">
+          <div class="when">2026.08.18<br>ISSUE 0006</div>
+          <div>
+            <h4>零样本导航反击战与测试时计算</h4>
+            <div class="meta2">10 篇 backlog 精选 · 0 项官方口径 · 完整八栏</div>
+          </div>
+          <div class="cur"></div>
+        </div>
+
+        <div class="arow">
+          <div class="when">2026.08.06<br>ISSUE 0005</div>
+          <div>
+            <h4>世界-动作模型下沉与攻防第二回合</h4>
+            <div class="meta2">7 篇 backlog 精选 · 0 项官方口径 · 完整八栏</div>
+          </div>
+          <div class="cur"></div>
+        </div>
+
+        <div class="arow">
+          <div class="when">2026.08.03<br>ISSUE 0004</div>
+          <div>
+            <h4>空中端到端成线与 VLA 运行时攻防</h4>
+            <div class="meta2">7 篇 backlog 精选 · 0 项官方口径 · 完整八栏</div>
+          </div>
+          <div class="cur"></div>
+        </div>
+
+        <div class="arow">
+          <div class="when">2026.08.02<br>ISSUE 0003</div>
+          <div>
+            <h4>VLA 参数两极化与农业场景 VLN</h4>
+            <div class="meta2">5 篇 backlog 精选 · 0 项官方口径 · 完整八栏</div>
+          </div>
+          <div class="cur"></div>
+        </div>
+
+        <div class="arow">
+          <div class="when">2026.08.01<br>ISSUE 0002</div>
+          <div>
+            <h4>腿部感知、轻量 VLA 与失败纠偏</h4>
+            <div class="meta2">5 篇 backlog 续刊 · 0 项官方口径 · 完整八栏</div>
+          </div>
+          <div class="cur"></div>
+        </div>
+
+        <div class="arow">
+          <div class="when">2026.07.30<br>ISSUE 0001</div>
+          <div>
+            <h4>基座的接口、真实的落差与推理的压缩</h4>
+            <div class="meta2">5 篇重点材料 · 0 项官方口径 · 首期基线 · 完整八栏</div>
+          </div>
+          <div class="cur"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div class="fin">
+    <span class="fl">端到端导航日报</span>
+    <span class="fc">E2E Navigation · VLA Policy · World Models</span>
+    <a class="fr" href="#hero">回到顶部 ↑</a>
+  </div>
+  <div class="credit">
+    数据来源：arXiv 官方 API（cs.RO / cs.CV / cs.AI，按提交日期倒序），覆盖 2026-09-06 至 2026-09-14 提交条目，人工筛选后收录 9 篇。<br>
+    标注「官方」的数字来自公开挑战赛或官方榜单，可独立复核；标注「自报」的为作者自选实验协议下的结果，跨论文不可直接比较。
+  </div>
+</footer>

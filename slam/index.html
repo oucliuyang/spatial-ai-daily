@@ -1,0 +1,771 @@
+<title>SLAM 建图定位日报 · 第 0007 期</title>
+
+<style>
+  :root{
+    --cream:#F4EEE3;
+    --cream-2:#EAE1D0;
+    --cream-3:#FAF6EC;
+    --dark:#221A17;
+    --dark-line:#3C302A;
+    --wine:#7E1D24;
+    --red:#A32B2B;
+    --red-2:#B4544B;
+    --ink:#1B1815;
+    --ink-2:#4C443D;
+    --ink-3:#8C8175;
+    --rule:#D9D0BE;
+    --on-dark:#F2EDE4;
+    --on-dark-2:#A99C8D;
+
+    --sans:"PingFang SC","Hiragino Sans GB","Source Han Sans SC","Noto Sans CJK SC","Microsoft YaHei",-apple-system,"Segoe UI",Roboto,sans-serif;
+    --mono:"Cascadia Mono",ui-monospace,"SF Mono","JetBrains Mono",Consolas,"DejaVu Sans Mono",monospace;
+    --serif:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;
+  }
+
+  body{ background:var(--cream); color:var(--ink); font-family:var(--sans); font-size:15px; line-height:1.75; -webkit-font-smoothing:antialiased; }
+  a{ color:inherit; }
+  a:focus-visible, summary:focus-visible{ outline:2px solid var(--red); outline-offset:3px; }
+
+  .eyebrow{ font-family:var(--mono); font-size:.68rem; letter-spacing:.22em; text-transform:uppercase; color:var(--red); }
+  .mono{ font-family:var(--mono); font-variant-numeric:tabular-nums; }
+
+  /* ── 顶栏 ── */
+  .topbar{
+    position:sticky; top:0; z-index:20; background:var(--cream);
+    border-bottom:1px solid var(--red);
+    display:flex; align-items:center; gap:1.5rem;
+    padding:.75rem 2rem; flex-wrap:wrap;
+  }
+  .topbar .logo{ font-size:.95rem; font-weight:800; letter-spacing:.02em; }
+  .topbar nav{ display:flex; gap:3.2rem; margin:0 auto; }
+  .topbar nav a{ font-size:.82rem; text-decoration:none; color:var(--ink-2); }
+  .topbar nav a:hover{ color:var(--red); }
+  .topbar nav a.on{ color:var(--ink); font-weight:700; }
+  .stamp{ font-family:var(--mono); font-size:.66rem; letter-spacing:.14em; color:var(--ink-3); line-height:1.7; white-space:nowrap; }
+  .stamp b{ color:var(--ink-2); font-weight:400; }
+
+  /* ── 通栏骨架 ── */
+  .band{ border-bottom:1px solid var(--rule); }
+  .band[data-bg="dark"]{ background:var(--dark); color:var(--on-dark); border-bottom-color:var(--dark-line); }
+  .band[data-bg="cream2"]{ background:var(--cream-2); }
+  .band[data-bg="cream3"]{ background:var(--cream-3); }
+
+  .split{
+    max-width:1560px; margin:0 auto;
+    display:grid; grid-template-columns:1fr; gap:0;
+  }
+  @media (min-width:900px){
+    .split{ grid-template-columns:16rem 1fr; }
+    .rail{ border-right:1px solid var(--rule); }
+    .band[data-bg="dark"] .rail{ border-right-color:var(--dark-line); }
+  }
+  .rail{ padding:2.6rem 1.6rem 2rem 2rem; }
+  .rail .num{
+    font-family:var(--mono); font-size:3.4rem; line-height:1; font-weight:300;
+    color:var(--red); letter-spacing:.02em; font-variant-numeric:tabular-nums slashed-zero;
+    font-feature-settings:"zero" 1;
+  }
+  .rail .cn{ margin-top:1.1rem; font-size:.8rem; color:var(--ink-2); }
+  .rail .en{ font-family:var(--mono); font-size:.62rem; letter-spacing:.18em; color:var(--ink-3); text-transform:uppercase; }
+  .band[data-bg="dark"] .rail .cn{ color:var(--on-dark-2); }
+  .band[data-bg="dark"] .rail .en{ color:#6E6058; }
+
+  .col{ padding:2.6rem 2rem 3.4rem; min-width:0; }
+
+  h2.big{
+    font-size:clamp(1.5rem,1rem + 2.1vw,2.35rem); font-weight:800; line-height:1.34;
+    margin:.55rem 0 0; letter-spacing:-.01em; text-wrap:balance;
+  }
+  .sec-note{ font-family:var(--mono); font-size:.66rem; line-height:1.9; color:var(--ink-3); text-align:right; letter-spacing:.04em; }
+
+  /* ── 首屏 ── */
+  .hero{ max-width:1560px; margin:0 auto; display:grid; grid-template-columns:1fr; }
+  @media (min-width:900px){ .hero{ grid-template-columns:1fr 1fr; } .hero .right{ border-left:1px solid var(--rule); } }
+  .hero .left{ padding:3.4rem 2rem 3rem; display:flex; flex-direction:column; }
+  .hero .right{ padding:3.4rem 2rem 3rem; }
+
+  .hero h1{
+    font-size:clamp(2.6rem,1.4rem + 5.2vw,5.1rem); font-weight:900; line-height:1.02;
+    letter-spacing:.01em; margin:.7rem 0 0;
+  }
+  .hero .sub{ margin-top:1rem; font-size:clamp(1rem,.85rem + .6vw,1.32rem); letter-spacing:.22em; color:var(--ink-2); font-weight:400; }
+
+  .pull{ margin-top:4.5rem; border-left:2px solid var(--wine); padding-left:1.3rem; }
+  .pull .tag{ font-size:.75rem; color:var(--red); letter-spacing:.1em; }
+  .pull p{ margin:.9rem 0 0; font-size:clamp(1.35rem,1rem + 1.6vw,2.05rem); font-weight:800; line-height:1.46; letter-spacing:.01em; }
+
+  .cta{ margin-top:auto; padding-top:3rem; display:flex; gap:.8rem; flex-wrap:wrap; }
+  .btn{
+    display:inline-flex; align-items:center; gap:2.4rem; justify-content:space-between;
+    font-size:.8rem; font-weight:700; text-decoration:none; padding:.75rem 1.1rem; min-width:10rem;
+  }
+  .btn[data-k="solid"]{ background:var(--wine); color:#F7F1E7; }
+  .btn[data-k="solid"]:hover{ background:#6A1720; }
+  .btn[data-k="ghost"]{ border:1px solid var(--wine); color:var(--wine); }
+  .btn[data-k="ghost"]:hover{ background:rgba(126,29,36,.06); }
+
+  /* 时间轴 */
+  .vlog-h{ display:flex; align-items:baseline; gap:1rem; border-bottom:1px solid var(--rule); padding-bottom:.5rem; }
+  .vlog-h .cnt{ margin-left:auto; font-family:var(--mono); font-size:.68rem; color:var(--red); letter-spacing:.1em; }
+  .vlog{ margin-top:2rem; border-left:1px solid var(--rule); padding-left:2rem; display:flex; flex-direction:column; }
+  .ev{ position:relative; padding:0 0 1.9rem; border-bottom:1px dashed var(--rule); margin-bottom:1.9rem; display:flex; gap:1rem; align-items:flex-start; }
+  .ev:last-child{ border-bottom:0; margin-bottom:0; padding-bottom:0; }
+  .ev::before{
+    content:""; position:absolute; left:-2.44rem; top:.42rem;
+    width:.55rem; height:.55rem; border-radius:50%;
+    background:var(--red); box-shadow:0 0 0 3px var(--cream), 0 0 0 4px var(--red);
+  }
+  .ev .meat{ flex:1; min-width:0; }
+  .ev .ts{ font-family:var(--mono); font-size:.68rem; color:var(--ink-3); letter-spacing:.1em; }
+  .ev h3{ font-size:1.12rem; font-weight:600; margin:.35rem 0 .6rem; letter-spacing:.01em; }
+  .ev h3 a{ text-decoration:none; border-bottom:1px solid var(--ink-3); }
+  .ev h3 a:hover{ color:var(--red); border-color:var(--red); }
+  .ev .kv{ font-size:.72rem; color:var(--ink-2); line-height:1.85; }
+  .ev .kv b{ font-weight:400; color:var(--ink-3); }
+  .ev .ok{ color:var(--red); font-size:1.4rem; line-height:1; padding-top:.4rem; }
+  .sig-line{ margin-top:2rem; text-align:right; font-family:var(--serif); font-style:italic; font-size:.95rem; color:var(--red-2); }
+
+  /* ── 结论条目 ── */
+  .items{ margin-top:2.4rem; }
+  .item{ border-top:1px dashed var(--rule); padding:1.7rem 0; display:grid; grid-template-columns:2.6rem 1fr; gap:1rem; }
+  .item:first-child{ border-top:1px solid var(--rule); }
+  .item .n{ font-family:var(--mono); font-size:.95rem; color:var(--red); padding-top:.1rem; }
+  .item .hd{ display:flex; gap:.7rem; align-items:center; flex-wrap:wrap; margin-bottom:.55rem; }
+  .item h3{ font-size:1.08rem; font-weight:700; margin:0; letter-spacing:.01em; }
+  .item p{ margin:0; font-size:.87rem; color:var(--ink-2); max-width:64ch; }
+  .item strong{ color:var(--ink); font-weight:700; }
+  .pill{ font-family:var(--mono); font-size:.62rem; letter-spacing:.08em; color:var(--red); border:1px solid var(--red); padding:.02rem .3rem; white-space:nowrap; }
+  .src{ display:inline-block; margin-top:.9rem; font-family:var(--mono); font-size:.68rem; letter-spacing:.06em; color:var(--red); text-decoration:none; font-weight:700; }
+  .src:hover{ text-decoration:underline; }
+  .src + .src{ margin-left:1.4rem; }
+  details{ margin-top:.6rem; }
+  summary{ cursor:pointer; list-style:none; font-family:var(--mono); font-size:.68rem; letter-spacing:.06em; color:var(--red); font-weight:700; }
+  summary::-webkit-details-marker{ display:none; }
+  summary::after{ content:" ＋"; }
+  details[open] summary::after{ content:" －"; }
+  .drawer{ margin-top:.9rem; padding:1rem 1.2rem; background:rgba(0,0,0,.028); border-left:1px solid var(--rule); font-size:.85rem; color:var(--ink-2); display:flex; flex-direction:column; gap:.7rem; }
+  .drawer p{ margin:0; max-width:66ch; }
+  .drawer b{ color:var(--ink); }
+
+  /* ── 深色卡片 ── */
+  .cards{ margin-top:2.2rem; display:grid; grid-template-columns:1fr; border:1px solid var(--dark-line); }
+  @media (min-width:1000px){ .cards{ grid-template-columns:repeat(3,1fr); } .card + .card{ border-left:1px solid var(--dark-line); border-top:0; } }
+  .card + .card{ border-top:1px solid var(--dark-line); }
+  .card{ padding:1.7rem 1.5rem; display:flex; flex-direction:column; gap:.9rem; }
+  .card .eyebrow{ color:var(--red-2); font-size:.62rem; }
+  .card h3{ font-size:1.28rem; font-weight:700; margin:0; line-height:1.42; color:var(--on-dark); letter-spacing:.01em; }
+  .card p{ margin:0; font-size:.84rem; color:var(--on-dark-2); }
+  .card ul{ margin:0; padding-left:1.1rem; list-style:none; display:flex; flex-direction:column; gap:.3rem; }
+  .card li{ font-size:.79rem; color:var(--on-dark-2); font-family:var(--mono); letter-spacing:.01em; }
+  .card li a{ color:var(--red-2); text-decoration:none; margin-left:.5rem; }
+  .card li a:hover{ text-decoration:underline; }
+  .card .links{ margin-top:auto; padding-top:.6rem; display:flex; gap:1.1rem; flex-wrap:wrap; }
+  .card .links a{ font-family:var(--mono); font-size:.7rem; color:var(--red-2); text-decoration:none; letter-spacing:.05em; }
+  .card .links a:hover{ text-decoration:underline; }
+
+  .note{ margin-top:1.6rem; border:1px solid var(--dark-line); border-left:2px solid var(--red); padding:1.2rem 1.4rem; display:grid; grid-template-columns:1fr; gap:1rem; }
+  @media (min-width:900px){ .note{ grid-template-columns:11rem 1fr; gap:2rem; } }
+  .note .lab{ font-family:var(--mono); font-size:.64rem; letter-spacing:.12em; color:var(--red-2); text-transform:uppercase; }
+  .note p{ margin:0; font-size:.85rem; color:var(--on-dark-2); }
+  .note b{ color:var(--on-dark); font-weight:600; }
+
+  /* ── 榜单 ── */
+  .lb{ margin-top:2rem; display:grid; grid-template-columns:1fr; gap:2rem; }
+  @media (min-width:1000px){ .lb{ grid-template-columns:1.35fr 1fr; align-items:start; } }
+  .lb p{ margin:0 0 .8rem; font-size:.88rem; color:var(--ink-2); max-width:56ch; }
+  .caveat{ background:var(--cream-2); border-left:2px solid var(--wine); padding:.75rem 1rem; font-size:.8rem; color:var(--ink-2); }
+  .lb-links{ margin-top:1rem; display:flex; gap:1.4rem; flex-wrap:wrap; }
+  .lb-links a{ font-family:var(--mono); font-size:.7rem; color:var(--red); text-decoration:none; font-weight:700; letter-spacing:.04em; }
+  .lb-links a:hover{ text-decoration:underline; }
+
+  .statcard{ border:1px solid var(--red); padding:1.5rem 1.6rem 1.2rem; }
+  .statcard .eyebrow{ font-size:.62rem; }
+  .statcard .huge{ font-size:clamp(3.2rem,2rem + 4vw,4.9rem); font-weight:300; color:var(--red); line-height:1; margin:.7rem 0 .3rem; font-family:var(--mono); letter-spacing:-.02em; }
+  .statcard .cap{ font-family:var(--mono); font-size:.64rem; letter-spacing:.12em; color:var(--ink-3); text-transform:uppercase; }
+  .statcard .rows{ margin-top:1.4rem; border-top:1px solid var(--rule); }
+  .statcard .r{ display:flex; justify-content:space-between; gap:1rem; border-bottom:1px dotted var(--rule); padding:.45rem 0; font-size:.76rem; }
+  .statcard .r:last-child{ border-bottom:0; }
+  .statcard .r span:first-child{ font-family:var(--mono); color:var(--ink-2); letter-spacing:.03em; }
+  .statcard .r span:last-child{ font-family:var(--mono); color:var(--ink); font-variant-numeric:tabular-nums; }
+
+  /* ── 表格 ── */
+  .scroll{ overflow-x:auto; margin-top:2rem; }
+  table{ border-collapse:collapse; width:100%; min-width:46rem; }
+  thead th{ font-family:var(--mono); font-size:.62rem; letter-spacing:.14em; text-transform:uppercase; color:var(--ink-3); font-weight:400; text-align:left; padding:0 1rem .5rem 0; border-bottom:1px solid var(--red); white-space:nowrap; }
+  tbody td{ padding:1.05rem 1rem 1.05rem 0; border-bottom:1px solid var(--rule); vertical-align:top; font-size:.83rem; color:var(--ink-2); }
+  tbody tr:last-child td{ border-bottom:0; }
+  td.k{ font-family:var(--mono); font-size:.75rem; color:var(--ink-3); width:2.5rem; }
+  td.name{ font-weight:700; color:var(--ink); font-size:.88rem; white-space:nowrap; }
+
+  /* ── 审阅清单 ── */
+  .queue{ margin-top:2rem; }
+  .q{ display:grid; grid-template-columns:2.8rem 1fr; gap:1rem; padding:1.4rem 1.1rem; border-bottom:1px solid var(--rule); }
+  .q:first-child{ background:var(--cream-2); border-top:1px solid var(--rule); }
+  .q .n{ font-family:var(--mono); font-size:.92rem; color:var(--red); }
+  .q .grid{ display:grid; grid-template-columns:1fr; gap:.9rem; }
+  @media (min-width:1000px){ .q .grid{ grid-template-columns:1.15fr 1fr 5.5rem; gap:1.6rem; align-items:start; } }
+  .q h3{ font-size:.98rem; font-weight:700; margin:0 0 .3rem; line-height:1.45; }
+  .q h3 a{ text-decoration:none; }
+  .q h3 a:hover{ color:var(--red); }
+  .q .by{ font-size:.72rem; color:var(--ink-3); }
+  .q .why{ font-size:.78rem; color:var(--ink-2); }
+  .q .why em{ font-style:normal; color:var(--red); }
+  .q .act{ justify-self:start; font-family:var(--mono); font-size:.64rem; color:var(--red); border:1px solid var(--red); padding:.15rem .45rem; white-space:nowrap; }
+
+  /* ── 变更日志 ── */
+  .delta{ margin-top:2rem; display:grid; grid-template-columns:1fr; border:1px solid var(--rule); }
+  @media (min-width:900px){ .delta{ grid-template-columns:1fr 1fr; } }
+  .dcell{ padding:1.4rem 1.5rem; border-top:1px solid var(--rule); display:flex; flex-direction:column; gap:.5rem; }
+  .dcell:nth-child(-n+1){ border-top:0; }
+  @media (min-width:900px){
+    .dcell:nth-child(-n+2){ border-top:0; }
+    .dcell:nth-child(even){ border-left:1px solid var(--rule); }
+  }
+  .dcell h4{ font-size:1rem; font-weight:700; margin:0; }
+  .dcell p{ margin:0; font-size:.82rem; color:var(--ink-2); }
+
+  /* ── 归档 ── */
+  .arch{ margin-top:1.6rem; }
+  .arow{ display:grid; grid-template-columns:1fr; gap:.35rem; padding:1.1rem 0; border-bottom:1px solid var(--rule); }
+  @media (min-width:800px){ .arow{ grid-template-columns:9rem 1fr 6rem; gap:1.5rem; align-items:baseline; } }
+  .arow:first-child{ border-top:1px solid var(--rule); }
+  .arow .when{ font-family:var(--mono); font-size:.7rem; color:var(--ink-3); letter-spacing:.06em; line-height:1.7; }
+  .arow h4{ font-size:.95rem; font-weight:700; margin:0 0 .18rem; }
+  .arow .meta2{ font-size:.72rem; color:var(--ink-3); }
+  .arow .cur{ font-family:var(--mono); font-size:.64rem; color:var(--red); justify-self:start; }
+  @media (min-width:800px){ .arow .cur{ justify-self:end; } }
+
+  /* ── 页脚 ── */
+  footer{ background:var(--wine); color:#F3E9DC; }
+  .fin{ max-width:1560px; margin:0 auto; padding:1.6rem 2rem; display:flex; align-items:center; gap:1.5rem; flex-wrap:wrap; }
+  .fin .fl{ font-size:.92rem; font-weight:800; }
+  .fin .fc{ margin:0 auto; font-family:var(--mono); font-size:.66rem; letter-spacing:.2em; color:#D9BFB6; text-transform:uppercase; }
+  .fin .fr{ font-size:.72rem; color:#E7D4CB; text-decoration:none; }
+  .fin .fr:hover{ text-decoration:underline; }
+  .credit{ max-width:1560px; margin:0 auto; padding:0 2rem 1.6rem; font-size:.68rem; color:#C9A79E; line-height:1.9; }
+</style>
+
+<div class="topbar">
+  <span class="logo">SLAM 建图定位日报</span>
+  <nav>
+    <a href="../index.html">总览</a>
+    <a class="on" href="#hero">今日</a>
+    <a href="#s2">主题</a>
+    <a href="#s5">排行榜</a>
+    <a href="#arch">归档</a>
+  </nav>
+  <div class="stamp">DATE&nbsp;&nbsp;: <b>2026.09.16</b><br>ISSUE&nbsp;: <b>0007</b></div>
+</div>
+
+<!-- ══════ 首屏 ══════ -->
+<div class="band" id="hero">
+  <div class="hero">
+    <div class="left">
+      <div class="eyebrow">Localization &amp; Mapping Research Notes</div>
+      <h1>SLAM 日报</h1>
+      <div class="sub">视觉 SLAM · 多模态融合 · 稠密建图</div>
+
+      <div class="pull">
+        <div class="tag">＊&nbsp;&nbsp;今日结论</div>
+        <p>视场角不是参数，<br>是优化的条件数。</p>
+      </div>
+
+      <div class="cta">
+        <a class="btn" data-k="solid" href="#s1">阅读今日简报<span>→</span></a>
+        <a class="btn" data-k="ghost" href="#arch">浏览全部日报<span>→</span></a>
+      </div>
+    </div>
+
+    <div class="right">
+      <div class="vlog-h">
+        <span class="eyebrow">Verification Log</span>
+        <span class="cnt">新增 05</span>
+      </div>
+
+      <div class="vlog">
+        <div class="ev">
+          <div class="meat">
+            <div class="ts">01&nbsp;&nbsp;[ 09·15 ]&nbsp;&nbsp;›</div>
+            <h3><a href="https://arxiv.org/abs/2609.17387">PanoGS-SLAM</a></h3>
+            <div class="kv"><b>领域:</b> 全景 / 3DGS SLAM<br><b>结果:</b> 球面域渲染，角度覆盖越大收敛越稳</div>
+          </div>
+          <div class="ok">✓</div>
+        </div>
+
+        <div class="ev">
+          <div class="meat">
+            <div class="ts">02&nbsp;&nbsp;[ 09·04 ]&nbsp;&nbsp;›</div>
+            <h3><a href="https://arxiv.org/abs/2609.05325">FIRE-LIVWO</a></h3>
+            <div class="kv"><b>领域:</b> 多模态 / 退化处理<br><b>结果:</b> 煤矿平均定位误差 5.677 m</div>
+          </div>
+          <div class="ok">✓</div>
+        </div>
+
+        <div class="ev">
+          <div class="meat">
+            <div class="ts">03&nbsp;&nbsp;[ 08·31 ]&nbsp;&nbsp;›</div>
+            <h3><a href="https://arxiv.org/abs/2608.30690">Failure or Drift?</a></h3>
+            <div class="kv"><b>领域:</b> 评测 / 鲁棒性<br><b>结果:</b> 学习型追踪器以漂移替代丢失</div>
+          </div>
+          <div class="ok">✓</div>
+        </div>
+      </div>
+
+      <div class="sig-line">Sensing geometry shapes the optimization landscape.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════ 01 今日结论 ══════ -->
+<div class="band" id="s1">
+  <div class="split">
+    <div class="rail">
+      <div class="num">01</div>
+      <div class="cn">今日结论</div>
+      <div class="en">2026.09.16</div>
+    </div>
+    <div class="col">
+      <div style="display:flex;gap:2rem;align-items:flex-start;flex-wrap:wrap">
+        <div style="flex:1;min-width:16rem">
+          <div class="eyebrow">Daily Brief / Issue 0007</div>
+          <h2 class="big">五项信号：全景视场与漂移审计</h2>
+        </div>
+        <div class="sec-note">覆盖窗口：2026.08.18 – 09.15<br>官方口径与作者自报已分别标注</div>
+      </div>
+
+      <div class="items">
+
+        <div class="item">
+          <div class="n">01</div>
+          <div>
+            <div class="hd"><span class="pill">高</span><h3>全景视场重塑优化条件</h3></div>
+            <p>PanoGS-SLAM 是首个建在 3DGS 上的全景稠密 SLAM：直接在<strong>球面域</strong>做可微渲染与位姿优化，用全向光度约束稳住跟踪；球面一致光度损失补偿等距柱状投影的面积畸变，深度引导高斯初始化稳定新观测区域的增量建图。</p>
+            <details>
+              <summary>展开全文</summary>
+              <div class="drawer">
+                <p>受控视场角实验给出本期最有工程价值的结论：随角度覆盖增加，优化条件数与收敛稳定性呈<b>单调改善</b>——传感几何本身在塑造可微高斯 SLAM 的优化地形，不只是多看到一点画面。</p>
+                <p>论文的出发点是窄视场针孔相机让位姿可观测性偏弱，快速运动与大视角变化下光度优化不稳。在真实与合成全景基准 PALVIO、SynPano 上，跟踪精度与渲染质量均超过几何类与 GS 类基线，前端收敛快且实时。作者称源码将公开，摘要未给具体指标数字。</p>
+              </div>
+            </details>
+            <a class="src" href="https://arxiv.org/abs/2609.17387">核验来源 ↗</a>
+          </div>
+        </div>
+
+        <div class="item">
+          <div class="n">02</div>
+          <div>
+            <div class="hd"><span class="pill">中高</span><h3>合成损坏能否替代真实恶劣天气</h3></div>
+            <p>该工作把单目 SLAM 放进图像域、几何域与复合损坏下评测，再与 4Seasons 的真实恶劣条件对照。关键发现：学习型追踪器基本是用<strong>持续甚至严重的漂移</strong>替代了灾难性跟踪丢失——不报失败，但一直在偏。</p>
+            <details>
+              <summary>展开全文</summary>
+              <div class="drawer">
+                <p>更要紧的是排序会变：结构化的雨、雾代理能保住真实世界里的方法排序，简单的光照代理则不能。作者的判据很实在——合成压力测试只有在导出与它所近似的真实条件相同的工程结论时，才算有用。</p>
+                <p>评测方式上拒绝把鲁棒性压成单一轨迹误差，而是把<b>显式跟踪失败</b>与<b>仍在运行的方法所累积的漂移</b>分开统计。对照组为一个经典特征法系统与两个学习型追踪器。</p>
+              </div>
+            </details>
+            <a class="src" href="https://arxiv.org/abs/2608.30690">核验来源 ↗</a>
+            <a class="src" href="https://github.com/abhaythomas/master_thesis_vslamlab_robustness">代码 ↗</a>
+          </div>
+        </div>
+
+        <div class="item">
+          <div class="n">03</div>
+          <div>
+            <div class="hd"><span class="pill">中高</span><h3>多会话地图的链式回环</h3></div>
+            <p>Chain-SLAM 面向大规模多会话 LiDAR 建图：用邻接图把几何约束在跨会话关键帧间<strong>链式传播</strong>，由可靠的短程回环触发长程一致性；先用 GNSS 邻近位置识别做会话间初始对齐，再在统一因子图里联合优化已载入地图与新采轨迹。</p>
+            <details>
+              <summary>展开全文</summary>
+              <div class="drawer">
+                <p>不做动态物体剔除也能同时维持会话间与会话内的几何一致，跨平台鲁棒且超参调整少。作者报告在大规模数据集上轨迹精度提升、多会话整合稳定，摘要未给具体数字。</p>
+                <p>值得跟的是『地图复用』这条线：多会话对齐与在线回环检测被放进同一个后端，而不是离线拼图后再交付。源码已公开。</p>
+              </div>
+            </details>
+            <a class="src" href="https://arxiv.org/abs/2609.12221">核验来源 ↗</a>
+            <a class="src" href="https://ai4ce.github.io/Chain-SLAM/">项目页 ↗</a>
+          </div>
+        </div>
+
+        <div class="item">
+          <div class="n">04</div>
+          <div>
+            <div class="hd"><span class="pill">中高</span><h3>煤矿烟尘下的模态切换</h3></div>
+            <p>FIRE-LIVWO 在迭代误差状态卡尔曼滤波里用统一 VoxelMap 融合 4D 毫米波雷达、LiDAR 与视觉：烟尘中靠雷达穿透力与<strong>逐点多普勒速度约束</strong>保住状态可观测性，自相似长廊里紧耦合轮速计与非完整约束抑制漂移。</p>
+            <details>
+              <summary>展开全文</summary>
+              <div class="drawer">
+                <p>核心贡献是基于几何与视觉可观测性分析的<b>退化检测与自适应融合模型切换</b>：在线量化可观测性并动态调整各模态权重，真实煤矿实验中能准确识别失效边界。</p>
+                <p>作者自报平均定位误差 <b>5.677 m</b>，并称优于基线；这是大尺度地下巷道下的数字，口径需看正文。称已在 GitHub 开源，摘要未给仓库地址。</p>
+              </div>
+            </details>
+            <a class="src" href="https://arxiv.org/abs/2609.05325">核验来源 ↗</a>
+          </div>
+        </div>
+
+        <div class="item">
+          <div class="n">05</div>
+          <div>
+            <div class="hd"><span class="pill">中</span><h3>轨迹上下文救回弱纹理检索</h3></div>
+            <p>TRAIL 用条件随机场把<strong>视觉相似度</strong>与<strong>相机运动一致性</strong>两个学习函数结合，随查询序列逐帧细化候选参考的概率分布，在无序参考库上定位序列末帧——与序列对序列方法不同，不要求数据库自身有序。</p>
+            <details>
+              <summary>展开全文</summary>
+              <div class="drawer">
+                <p>较一个 SOTA 基线在其主基准上<b>最高提升 8.3 个百分点</b>，无需重训即可迁移到未见数据集，且<b>视觉线索越稀缺增益越大</b>。定位是任意预训练 VPR 主干之上的轻量后处理层。</p>
+                <p>它正好接上 0006 期 DAR 的质疑：把每张查询图孤立处理，就丢掉了任何真实轨迹本身携带的序列上下文。</p>
+              </div>
+            </details>
+            <a class="src" href="https://arxiv.org/abs/2609.07373">核验来源 ↗</a>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════ 02-04 主题记录 ══════ -->
+<div class="band" data-bg="dark" id="s2">
+  <div class="split">
+    <div class="rail">
+      <div class="num">02–04</div>
+      <div class="cn">主题记录</div>
+      <div class="en">Panorama / Retrieval / Degeneracy</div>
+    </div>
+    <div class="col">
+      <div class="cards">
+
+        <div class="card">
+          <div class="eyebrow">3DGS-SLAM · 视场、实时与动态</div>
+          <h3>高斯 SLAM 的三道工程门槛</h3>
+          <p>PanoGS-SLAM 把渲染搬进球面域换全向约束；LightSplat 混合表示加在线回环，平均 8 FPS；SCOUT-SLAM 用共享基网络拆开跟踪与重建的循环依赖。</p>
+          <ul>
+            <li>2609.17387: 球面域渲染 · 全向约束</li>
+            <li>2609.07274: 在线回环 · 平均 8 FPS</li>
+            <li>2609.14634: 双不确定性 · 动态场景</li>
+          </ul>
+          <div class="links">
+            <a href="https://arxiv.org/abs/2609.17387">PanoGS-SLAM ↗</a>
+            <a href="https://arxiv.org/abs/2609.07274">LightSplat ↗</a>
+            <a href="https://arxiv.org/abs/2609.14634">SCOUT-SLAM ↗</a>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="eyebrow">位置识别 · 跨模态与上下文</div>
+          <h3>检索补上模态与序列两块</h3>
+          <p>DXPR 把相机与 LiDAR 统一成深度图交给视觉基础模型；TRAIL 用轨迹上下文最高提升 8.3 个百分点；HuMemSLAM 把 VPR 接进 ORB-SLAM3，延迟约低二到三倍。</p>
+          <ul>
+            <li>2609.09005: 深度图统一 · 跨季节鲁棒</li>
+            <li>2609.07373: CRF 轨迹上下文 · +8.3pp</li>
+            <li>2609.17168: 延迟约低二到三倍</li>
+          </ul>
+          <div class="links">
+            <a href="https://arxiv.org/abs/2609.09005">DXPR ↗</a>
+            <a href="https://arxiv.org/abs/2609.07373">TRAIL ↗</a>
+            <a href="https://arxiv.org/abs/2609.17168">HuMemSLAM ↗</a>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="eyebrow">退化与尺度 · 老问题新解</div>
+          <h3>从煤矿烟尘到单目尺度</h3>
+          <p>FIRE-LIVWO 用可观测性分析在线切换模态，煤矿平均误差 5.677 m；Scalix 把学习深度的像素与帧级尺度不确定性当独立测量塞进因子图；BLASt3R 统一在线与离线重建。</p>
+          <ul>
+            <li>2609.05325: 毫米波雷达 · 5.677 m</li>
+            <li>2608.17553: 尺度不确定性进因子图</li>
+            <li>2609.05210: 免标定超过已标定方法</li>
+          </ul>
+          <div class="links">
+            <a href="https://arxiv.org/abs/2609.05325">FIRE-LIVWO ↗</a>
+            <a href="https://arxiv.org/abs/2608.17553">Scalix ↗</a>
+            <a href="https://arxiv.org/abs/2609.05210">BLASt3R ↗</a>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="note">
+        <div class="lab">研发判断 / Note 07-A</div>
+        <p>本期两条可直接内化：<b>传感几何优先于算法微调</b>——PanoGS-SLAM 的受控视场角实验说明角度覆盖单调改善优化条件数，鱼眼/全景选型该提前到算法之前讨论；<b>鲁棒性评测要分账</b>——Failure or Drift 证明学习型追踪器把失败换成了沉默漂移，内部评测若只看有没有跟丢，会系统性高估学习模块。工程侧 FIRE-LIVWO 的可观测性在线量化，比固定权重融合更值得抄。</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════ 05 排行榜 ══════ -->
+<div class="band" id="s5">
+  <div class="split">
+    <div class="rail">
+      <div class="num">05</div>
+      <div class="cn">排行榜</div>
+      <div class="en">Verified Only</div>
+    </div>
+    <div class="col">
+      <div class="eyebrow">Leaderboard Watch</div>
+      <h2 class="big">本期无官方口径评测更新</h2>
+      <div class="lb"><div><div class="caveat">口径提示：本期未出现可独立复核的公开挑战赛或官方榜单更新；论文内部实验数字不与官方提交榜排名混列。</div></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════ 06 方向雷达 ══════ -->
+<div class="band" data-bg="cream2" id="s6">
+  <div class="split">
+    <div class="rail">
+      <div class="num">06</div>
+      <div class="cn">方向雷达</div>
+      <div class="en">Watchlist</div>
+    </div>
+    <div class="col">
+      <div class="eyebrow">Direction Radar</div>
+      <h2 class="big">本期雷达：全景、检索与退化五条线</h2>
+
+      <div class="scroll">
+        <table>
+          <thead>
+            <tr><th></th><th>方向</th><th>证据</th><th>为什么值得关注</th><th>主要风险</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="k">01</td>
+              <td class="name">全景高斯SLAM</td>
+              <td><span class="pill">中高</span></td>
+              <td>球面域优化 · 视场越大条件数越好</td>
+              <td>摘要无量化数字，代码尚未公开</td>
+            </tr>
+            <tr>
+              <td class="k">02</td>
+              <td class="name">漂移分账评测</td>
+              <td><span class="pill">高</span></td>
+              <td>分离跟踪失败与持续漂移 · 代码已开</td>
+              <td>只覆盖单目，三个系统样本偏小</td>
+            </tr>
+            <tr>
+              <td class="k">03</td>
+              <td class="name">多会话链式回环</td>
+              <td><span class="pill">中高</span></td>
+              <td>跨会话约束传播 · 统一因子图</td>
+              <td>初始对齐依赖 GNSS 邻近先验</td>
+            </tr>
+            <tr>
+              <td class="k">04</td>
+              <td class="name">雷达抗退化</td>
+              <td><span class="pill">中高</span></td>
+              <td>在线可观测性量化切换模态</td>
+              <td>5.677 m 为自报，仅煤矿单场景</td>
+            </tr>
+            <tr>
+              <td class="k">05</td>
+              <td class="name">轨迹感知检索</td>
+              <td><span class="pill">中</span></td>
+              <td>任意主干之上后处理 · +8.3pp</td>
+              <td>需查询有序，单帧重定位不适用</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════ 07 审阅清单 ══════ -->
+<div class="band" data-bg="cream3" id="s7">
+  <div class="split">
+    <div class="rail">
+      <div class="num">07</div>
+      <div class="cn">审阅清单</div>
+      <div class="en">Reading Queue</div>
+    </div>
+    <div class="col">
+      <div class="queue">
+
+        <div class="q">
+          <div class="n">01</div>
+          <div class="grid">
+            <div>
+              <h3><a href="https://arxiv.org/abs/2609.17387">PanoGS-SLAM: Panoramic 3D Gaussian Splatting SLAM</a></h3>
+              <div class="by">Yongqi Mao et al. · 2026.09.15</div>
+            </div>
+            <div class="why">球面域可微渲染与位姿优化；受控实验显示角度覆盖增大单调改善收敛稳定性。<br><em>与我们：</em>全景/鱼眼平台稠密 SLAM 的选型依据。</div>
+            <div class="act">精读 ＋</div>
+          </div>
+        </div>
+
+        <div class="q">
+          <div class="n">02</div>
+          <div class="grid">
+            <div>
+              <h3><a href="https://arxiv.org/abs/2608.30690">Failure or Drift? Evaluating Monocular SLAM under Synthetic and Real-World Corruptions</a></h3>
+              <div class="by">Abhay Skaria Thomas et al. · 2026.08.31</div>
+            </div>
+            <div class="why">分离跟踪失败与漂移；雨雾代理保住真实排序，光照代理不能。<br><em>与我们：</em>内部鲁棒性评测该怎么设计的直接参照。</div>
+            <div class="act">精读 ＋</div>
+          </div>
+        </div>
+
+        <div class="q">
+          <div class="n">03</div>
+          <div class="grid">
+            <div>
+              <h3><a href="https://arxiv.org/abs/2609.12221">Chain-SLAM: Globally Consistent Backend for Multi-Session LiDAR SLAM via Chained Loop Closure</a></h3>
+              <div class="by">Zhiheng Li et al. · 2026.09.10</div>
+            </div>
+            <div class="why">邻接图链式传播跨会话约束，在线多会话地图对齐与复用，已开源。<br><em>与我们：</em>多会话地图复用后端的工程参照。</div>
+            <div class="act">浏览后精读 ＋</div>
+          </div>
+        </div>
+
+        <div class="q">
+          <div class="n">04</div>
+          <div class="grid">
+            <div>
+              <h3><a href="https://arxiv.org/abs/2609.05325">FIRE-LIVWO: Robust LiDAR-Inertial-Visual-Wheel Odometry via Failure-Immune mmWave Radar Enhancement</a></h3>
+              <div class="by">Kun Hu et al. · 2026.09.04</div>
+            </div>
+            <div class="why">IESKF 融合 4D 毫米波雷达/LiDAR/视觉/轮速，煤矿平均定位误差 5.677 m。<br><em>与我们：</em>烟尘与长廊退化场景的多模态兜底方案。</div>
+            <div class="act">浏览后精读 ＋</div>
+          </div>
+        </div>
+
+        <div class="q">
+          <div class="n">05</div>
+          <div class="grid">
+            <div>
+              <h3><a href="https://arxiv.org/abs/2609.09005">DXPR: Depth-Based Vision-LiDAR Cross-Modal Place Recognition Using Vision Foundation Models</a></h3>
+              <div class="by">Yungsoo Han et al. · 2026.09.08</div>
+            </div>
+            <div class="why">相机与 LiDAR 统一成深度图喂单一视觉基础模型；KITTI 多数序列 Recall@1 近满分。<br><em>与我们：</em>纯相机在既有 LiDAR 地图里重定位的路线。</div>
+            <div class="act">浏览 ＋</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════ 08 变更日志 ══════ -->
+<div class="band" id="s8">
+  <div class="split">
+    <div class="rail">
+      <div class="num">08</div>
+      <div class="cn">与上一期对比</div>
+      <div class="en">Delta Only</div>
+    </div>
+    <div class="col">
+      <div class="eyebrow">Change Log</div>
+      <h2 class="big">与 0006 相比</h2>
+
+      <div class="delta">
+        <div class="dcell">
+          <span class="pill">调整</span>
+          <h4>事件相机退居后台</h4>
+          <p>0006 三篇事件相机同期成主线；本期 backlog 重心转向 3DGS-SLAM 的部署指标——视场、帧率、动态场景。</p>
+        </div>
+        <div class="dcell">
+          <span class="pill">新增</span>
+          <h4>全景视场进 3DGS</h4>
+          <p>PanoGS-SLAM 首次把 3DGS SLAM 做进球面域，并给出角度覆盖与优化条件数的单调关系。</p>
+        </div>
+        <div class="dcell">
+          <span class="pill">调整</span>
+          <h4>评测反思换靶子</h4>
+          <p>0006 的 DAR 质疑 VPR 认地点还是认条件；本期矛头指向合成损坏能否代表真实恶劣天气。</p>
+        </div>
+        <div class="dcell">
+          <span class="pill">待验证</span>
+          <h4>开源承诺记账</h4>
+          <p>0006 的 2608.14902 承诺仍未核销；本期 Chain-SLAM 已给项目页，PanoGS-SLAM 与 FIRE-LIVWO 新增两笔待跟踪。</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════ 归档 ══════ -->
+<div class="band" id="arch">
+  <div class="split">
+    <div class="rail"></div>
+    <div class="col">
+      <div class="eyebrow">Archive / 研究档案</div>
+      <h2 class="big" style="font-size:clamp(1.6rem,1.1rem + 2vw,2.5rem)">往期日报</h2>
+      <p style="margin:.9rem 0 0;font-size:.85rem;color:var(--ink-2);max-width:60ch">每一期完整保留八个栏目、评测口径、审阅清单、中文摘要与原始链接。点击期次展开全文。</p>
+
+      <div class="arch">
+        <div class="arow">
+          <div class="when">2026.09.16<br>ISSUE 0007</div>
+          <div>
+            <h4>全景高斯 SLAM 与漂移审计</h4>
+            <div class="meta2">11 篇 backlog 精选 · 0 项官方口径 · 完整八栏</div>
+          </div>
+          <div class="cur">当前期</div>
+        </div>
+
+        <div class="arow">
+          <div class="when">2026.08.18<br>ISSUE 0006</div>
+          <div>
+            <h4>事件相机三连发与 VPR 评测反思</h4>
+            <div class="meta2">9 篇 backlog 精选 · 0 项官方口径 · 完整八栏</div>
+          </div>
+          <div class="cur"></div>
+        </div>
+
+        <div class="arow">
+          <div class="when">2026.08.06<br>ISSUE 0005</div>
+          <div>
+            <h4>无界长程 SLAM 与像素级回环</h4>
+            <div class="meta2">7 篇 backlog 精选 · 0 项官方口径 · 完整八栏</div>
+          </div>
+          <div class="cur"></div>
+        </div>
+
+        <div class="arow">
+          <div class="when">2026.08.03<br>ISSUE 0004</div>
+          <div>
+            <h4>冻结模型当传感器，卫星影像替 GPS</h4>
+            <div class="meta2">6 篇 backlog 精选 · 0 项官方口径 · 完整八栏</div>
+          </div>
+          <div class="cur"></div>
+        </div>
+
+        <div class="arow">
+          <div class="when">2026.08.02<br>ISSUE 0003</div>
+          <div>
+            <h4>野外基准、剪枝效率与GNSS拒止协同</h4>
+            <div class="meta2">7 篇跨候选池精选（1 篇非 arXiv） · 0 项官方口径 · 完整八栏</div>
+          </div>
+          <div class="cur"></div>
+        </div>
+
+        <div class="arow">
+          <div class="when">2026.08.01<br>ISSUE 0002</div>
+          <div>
+            <h4>共享工作区、纹理缺失与轻量前端</h4>
+            <div class="meta2">5 篇 backlog 续刊 · 0 项官方口径 · 完整八栏</div>
+          </div>
+          <div class="cur"></div>
+        </div>
+
+        <div class="arow">
+          <div class="when">2026.07.30<br>ISSUE 0001</div>
+          <div>
+            <h4>学习的位置、退化的方向与表征的减法</h4>
+            <div class="meta2">5 篇重点材料 · 3 项官方口径 · 首期基线 · 完整八栏</div>
+          </div>
+          <div class="cur"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div class="fin">
+    <span class="fl">SLAM 建图定位日报</span>
+    <span class="fc">Visual SLAM · Sensor Fusion · Dense Mapping</span>
+    <a class="fr" href="#hero">回到顶部 ↑</a>
+  </div>
+  <div class="credit">
+    数据来源：arXiv 官方 API（cs.RO / cs.CV，按提交日期倒序），覆盖 2026-08-18 至 2026-09-15 提交条目，人工筛选后收录 11 篇。<br>
+    标注「官方」的数字来自公开挑战赛或官方榜单，可独立复核；标注「自报」的为作者自选实验协议下的结果，跨论文不可直接比较。
+  </div>
+</footer>
